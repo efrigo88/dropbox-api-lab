@@ -1,6 +1,14 @@
 # Dropbox Transcript Downloader
 
-A Python application to download transcripts from Dropbox using the Dropbox API.
+A Python application to download transcripts from Dropbox using the Dropbox API. This tool helps you:
+
+- Securely connect to your Dropbox account using OAuth2 authentication
+- Browse and list files in your Dropbox account
+- Specifically target and download transcript files from a designated directory
+- Store downloaded transcripts locally in a structured format
+- Handle large files efficiently with proper error handling and progress tracking
+
+The application is designed to be run either locally or in a Docker container, making it flexible for different deployment scenarios. It uses environment variables for secure credential management and supports both development and production environments.
 
 ## Setup
 
