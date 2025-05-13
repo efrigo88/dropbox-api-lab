@@ -4,38 +4,47 @@ from typing import Optional
 import dropbox
 from dropbox.files import FileMetadata
 
+from src.constants import APP_KEY, APP_SECRET, REFRESH_TOKEN
+
 
 class DropboxAPI:
-    """A class to handle Dropbox file operations.
-
-    This class provides methods to interact with Dropbox API for listing
-    directories and downloading files.
-    """
-
     def __init__(
         self,
-        access_token: str,
-        dropbox_base_folder: str,
+        base_folder: str,
         dropbox_filepath: str,
         local_path: str,
     ) -> None:
         """Initialize the DropboxAPI with authentication and paths.
 
         Args:
-            access_token: Dropbox API access token
-            dropbox_base_folder: Base folder in Dropbox
+            base_folder: Base folder in Dropbox
             dropbox_filepath: Path to the file in Dropbox
             local_path: Local path where the file will be saved
         """
-        self.dbx = dropbox.Dropbox(access_token)
-        self.dropbox_base_folder = dropbox_base_folder
+        self.base_folder = base_folder
         self.dropbox_filepath = dropbox_filepath
         self.local_path = local_path
-        self.account = self.dbx.users_get_current_account()
-        print(
-            f"Successfully connected to Dropbox account: "
-            f"{self.account.name.display_name}"
-        )
+
+        try:
+            # Initialize Dropbox client with OAuth2 refresh token
+            self.dbx = dropbox.Dropbox(
+                app_key=APP_KEY,
+                app_secret=APP_SECRET,
+                oauth2_refresh_token=REFRESH_TOKEN,
+            )
+
+            # Test the connection
+            self.account = self.dbx.users_get_current_account()
+            print(
+                f"Successfully connected to Dropbox account: "
+                f"{self.account.name.display_name}"
+            )
+        except dropbox.exceptions.AuthError as e:
+            print(f"Authentication error: {e}")
+            raise
+        except Exception as e:
+            print(f"Error connecting to Dropbox: {e}")
+            raise
 
     def list_root_directory(self) -> None:
         """List all files and folders in the Dropbox root directory."""
@@ -54,7 +63,7 @@ class DropboxAPI:
 
     def list_base_folder(self) -> None:
         """List all files and folders in the transcript directory."""
-        result = self.dbx.files_list_folder(self.dropbox_base_folder)
+        result = self.dbx.files_list_folder(self.base_folder)
         if not result.entries:
             print("No files found in base folder")
         else:
@@ -68,11 +77,7 @@ class DropboxAPI:
                 print(f"- {entry.name} ({entry_type})")
 
     def get_file_metadata(self) -> Optional[FileMetadata]:
-        """Get metadata for the specified file in Dropbox.
-
-        Returns:
-            FileMetadata object if successful, None otherwise
-        """
+        """Get metadata for the specified file in Dropbox."""
         metadata = self.dbx.files_get_metadata(self.dropbox_filepath)
         if not isinstance(metadata, dropbox.files.FileMetadata):
             print(f"Error: {self.dropbox_filepath} is not a file")
