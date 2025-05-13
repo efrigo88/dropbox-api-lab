@@ -1,52 +1,98 @@
-# Dropbox API Lab
+# Dropbox Transcript Downloader
 
-This project provides a simple interface to interact with Dropbox using the Dropbox API. It allows you to list files and folders in your Dropbox and download files to your local machine.
-
-## Features
-
-- List files and folders in your Dropbox root or a specific folder
-- Download files from Dropbox to your local system
+A Python application to download transcripts from Dropbox using the Dropbox API.
 
 ## Setup
 
-1. Clone this repository.
-2. Install dependencies using uv (install this app first) and then:
+1. Create a Dropbox app in the [Dropbox Developer Console](https://www.dropbox.com/developers/apps)
+2. Get your app key and secret from the app settings
+3. Create a `.env` file in the project root with your credentials:
+   ```
+   DROPBOX_APP_KEY=your_app_key_here
+   DROPBOX_APP_SECRET=your_app_secret_here
+   ```
+
+## Installation
+
+### Local Development
+
+1. Install uv (Python package installer):
+
    ```bash
-   uv pip install . && uv pip install ".[dev]"
-   ```
-3. Create a `.env` file in the root directory and add your Dropbox API access token:
-   ```env
-   ACCESS_TOKEN=your_dropbox_access_token
+   curl -LsSf https://astral.sh/uv/install.sh | sh
    ```
 
-## Configuration
+2. Create and activate a virtual environment:
 
-- The Dropbox folder and file paths are set in `src/constants.py`.
-- The downloaded file will be saved to `data/transcript.pdf` by default.
+   ```bash
+   uv venv
+   source .venv/bin/activate  # On Unix/macOS
+   # or
+   .venv\Scripts\activate  # On Windows
+   ```
+
+3. Install dependencies:
+   ```bash
+   pip install -e ".[dev]"
+   ```
+
+### Docker (Recommended)
+
+Build the Docker image:
+
+```bash
+docker build -t api-lab .
+```
+
+## Authentication
+
+The application uses OAuth2 with refresh tokens for authentication. To get your refresh token:
+
+1. Run the token generation script:
+   ```bash
+   python src/get_refresh_token.py
+   ```
+2. Follow the prompts to authorize your app
+3. Copy the refresh token and add it to your `.env` file:
+   ```
+   DROPBOX_REFRESH_TOKEN=your_refresh_token_here
+   ```
 
 ## Usage
 
-You can use the `DropboxAPI` class in `src/api.py` to interact with Dropbox. Example usage:
+### Local Development
 
-```python
-from src.api import DropboxAPI
-from src.constants import ACCESS_TOKEN, BASE_DROPBOX_FOLDER, DROPBOX_FILEPATH, LOCAL_PATH
-
-dbx_api = DropboxAPI(
-    access_token=ACCESS_TOKEN,
-    dropbox_base_folder=BASE_DROPBOX_FOLDER,
-    dropbox_filepath=DROPBOX_FILEPATH,
-    local_path=LOCAL_PATH,
-)
-dbx_api.list_root_directory()
-dbx_api.list_base_folder()
-dbx_api.download_file()
-```
-
-To run the project, execute:
+Run the main script:
 
 ```bash
 python src/main.py
+```
+
+### Docker
+
+Run the container with a volume mount for data persistence:
+
+```bash
+docker run -v $(pwd)/data:/app/data api-lab
+```
+
+Remember to stop and remove the containers after you finish.
+
+The script will:
+
+1. Connect to your Dropbox account
+2. List files in the root directory
+3. List files in the transcript directory
+4. Download the specified transcript file
+
+## Development
+
+Run linters:
+
+```bash
+pylint src/
+black src/
+isort src/
 ```
 
 ## License
