@@ -63,3 +63,5 @@ myplan
 .cursor/
 
 *.pem
+
+data/
