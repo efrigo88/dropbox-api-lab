@@ -1,5 +1,5 @@
-from dotenv import load_dotenv
 import os
+from dotenv import load_dotenv
 
 load_dotenv()  # get access token from .env file
 ACCESS_TOKEN = os.getenv("ACCESS_TOKEN")

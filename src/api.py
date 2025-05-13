@@ -1,14 +1,15 @@
-import dropbox
 import os
 from typing import Optional
+
+import dropbox
 from dropbox.files import FileMetadata
 
 
 class DropboxAPI:
     """A class to handle Dropbox file operations.
 
-    This class provides methods to interact with Dropbox API for listing directories
-    and downloading files.
+    This class provides methods to interact with Dropbox API for listing
+    directories and downloading files.
     """
 
     def __init__(
@@ -32,7 +33,8 @@ class DropboxAPI:
         self.local_path = local_path
         self.account = self.dbx.users_get_current_account()
         print(
-            f"Successfully connected to Dropbox account: {self.account.name.display_name}"
+            f"Successfully connected to Dropbox account: "
+            f"{self.account.name.display_name}"
         )
 
     def list_root_directory(self) -> None:
@@ -43,9 +45,12 @@ class DropboxAPI:
         else:
             print("Files in root directory:")
             for entry in result.entries:
-                print(
-                    f"- {entry.name} ({'folder' if isinstance(entry, dropbox.files.FolderMetadata) else 'file'})"
+                entry_type = (
+                    "folder"
+                    if isinstance(entry, dropbox.files.FolderMetadata)
+                    else "file"
                 )
+                print(f"- {entry.name} ({entry_type})")
 
     def list_base_folder(self) -> None:
         """List all files and folders in the transcript directory."""
@@ -55,9 +60,12 @@ class DropboxAPI:
         else:
             print("Files in base folder:")
             for entry in result.entries:
-                print(
-                    f"- {entry.name} ({'folder' if isinstance(entry, dropbox.files.FolderMetadata) else 'file'})"
+                entry_type = (
+                    "folder"
+                    if isinstance(entry, dropbox.files.FolderMetadata)
+                    else "file"
                 )
+                print(f"- {entry.name} ({entry_type})")
 
     def get_file_metadata(self) -> Optional[FileMetadata]:
         """Get metadata for the specified file in Dropbox.
@@ -94,7 +102,8 @@ class DropboxAPI:
                 print("Error: Downloaded file is empty")
             elif downloaded_size != metadata.size:
                 print(
-                    f"Warning: Downloaded file size ({downloaded_size} bytes) doesn't match Dropbox file size ({metadata.size} bytes)"
+                    f"Warning: Downloaded file size ({downloaded_size} bytes) "
+                    f"doesn't match Dropbox file size ({metadata.size} bytes)"
                 )
             else:
                 print(f"\nDownload completed successfully: {self.local_path}")
@@ -102,7 +111,11 @@ class DropboxAPI:
         except dropbox.exceptions.ApiError as e:
             print(f"\nError downloading file: {e}")
             if e.error.is_path() and e.error.get_path().is_not_found():
-                print(f"The file was not found at path: {self.dropbox_filepath}")
+                print(
+                    f"The file was not found at path: {self.dropbox_filepath}"
+                )
                 print("Please verify the file path and try again.")
-        except Exception as e:
-            print(f"\nUnexpected error: {e}")
+        except dropbox.exceptions.AuthError as e:
+            print(f"\nAuthentication error: {e}")
+        except OSError as e:
+            print(f"\nFile system error: {e}")
